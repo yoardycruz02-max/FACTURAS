@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Control de Entregas y Armados</title>
+    
+    <!-- PWA Meta Tags para que Chrome/iOS lo reconozcan -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#00f3ff">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
@@ -24,62 +32,23 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
 
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            padding: 20px;
-            min-height: 100vh;
-        }
-
+        body { background-color: var(--bg-dark); color: var(--text-main); padding: 20px; min-height: 100vh; }
         header { text-align: center; margin-bottom: 20px; padding-top: 10px; }
-        
-        /* Logo y Botón Fullscreen */
         .header-content { display: flex; flex-direction: column; align-items: center; gap: 15px; }
         #logoImg { max-width: 180px; height: auto; filter: drop-shadow(0 0 8px rgba(0, 243, 255, 0.3)); }
         
-        .btn-fs { 
-            background: rgba(0, 243, 255, 0.1); 
-            border: 1px solid var(--neon-cyan); 
-            color: var(--neon-cyan); 
-            padding: 8px 15px; 
-            border-radius: 20px; 
-            cursor: pointer; 
-            font-size: 0.75rem; 
-            text-transform: uppercase; 
-            letter-spacing: 1px;
-            transition: all 0.3s;
-        }
+        .btn-fs { background: rgba(0, 243, 255, 0.1); border: 1px solid var(--neon-cyan); color: var(--neon-cyan); padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s; }
         .btn-fs:hover { background: var(--neon-cyan); color: #000; }
 
-        header h1 { 
-            color: var(--neon-cyan); 
-            font-size: 1.6rem; 
-            text-shadow: 0 0 12px rgba(0, 243, 255, 0.8); 
-            text-transform: uppercase; 
-            letter-spacing: 2px; 
-        }
-
+        header h1 { color: var(--neon-cyan); font-size: 1.6rem; text-shadow: 0 0 12px rgba(0, 243, 255, 0.8); text-transform: uppercase; letter-spacing: 2px; }
         .container { max-width: 900px; margin: 0 auto; }
-        
-        .card { 
-            background: linear-gradient(145deg, #121328, var(--bg-card)); 
-            border: 2px solid var(--border-neon); 
-            border-radius: 16px; 
-            padding: 24px; 
-            margin-bottom: 25px; 
-            box-shadow: 0 0 20px rgba(255, 0, 127, 0.25); 
-        }
-
+        .card { background: linear-gradient(145deg, #121328, var(--bg-card)); border: 2px solid var(--border-neon); border-radius: 16px; padding: 24px; margin-bottom: 25px; box-shadow: 0 0 20px rgba(255, 0, 127, 0.25); }
         .card h2 { color: var(--neon-pink); font-size: 1.25rem; margin-bottom: 18px; border-bottom: 2px solid rgba(255, 0, 127, 0.4); padding-bottom: 10px; }
-
         .form-grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
         @media (min-width: 600px) { .form-grid { grid-template-columns: repeat(2, 1fr); } }
-
         .form-group { display: flex; flex-direction: column; }
         .full-width { grid-column: 1 / -1; }
-
         label { font-size: 0.85rem; color: var(--neon-cyan); margin-bottom: 6px; font-weight: 700; }
-
         input, select { background-color: #070814; border: 1px solid var(--border-cyan); border-radius: 8px; color: var(--text-main); padding: 12px; outline: none; transition: all 0.3s ease; }
         input:focus, select:focus { border-color: var(--neon-pink); box-shadow: 0 0 12px rgba(255, 0, 127, 0.6); }
 
@@ -87,15 +56,12 @@
         canvas { display: block; width: 100%; height: 130px; cursor: crosshair; }
         .signature-actions { display: flex; justify-content: space-between; padding: 8px 12px; border-top: 1px solid var(--border-cyan); font-size: 0.75rem; color: var(--text-muted); }
         .btn-clear { background: none; border: none; color: var(--neon-pink); cursor: pointer; font-weight: bold; }
-
         .btn-primary { background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple)); color: #fff; border: none; padding: 14px; border-radius: 8px; font-weight: 800; cursor: pointer; width: 100%; text-transform: uppercase; margin-top: 15px; box-shadow: 0 0 15px rgba(255, 0, 127, 0.5); }
-        
         .export-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
         .btn-export { padding: 12px; border: none; border-radius: 8px; color: #fff; font-weight: 700; cursor: pointer; text-transform: uppercase; font-size: 0.85rem; }
         .btn-excel { background: linear-gradient(135deg, #1d6f42, #2ecc71); }
         .btn-pdf { background: linear-gradient(135deg, #c0392b, #e74c3c); }
         .btn-wa { background: linear-gradient(135deg, #1e8449, var(--whatsapp-green)); color: #000; font-weight: 800; }
-
         .table-responsive { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
         th, td { padding: 12px; border-bottom: 1px solid rgba(0, 243, 255, 0.2); text-align: left; }
@@ -166,7 +132,16 @@
     </div>
 
     <script>
-        // Función de sonido potenciada
+        // --- REGISTRO DE SERVICE WORKER PARA INSTALACIÓN PWA ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('Service Worker registrado:', reg.scope))
+                    .catch(err => console.log('Error al registrar SW:', err));
+            });
+        }
+
+        // --- CÓDIGO ORIGINAL ---
         function playClick() {
             try {
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -174,24 +149,18 @@
                 const ctx = new AudioContext();
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
-                
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(800, ctx.currentTime);
                 osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.1);
-                
-                // Subí el volumen de 0.1 a 0.6
                 gain.gain.setValueAtTime(0.6, ctx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
-                
                 osc.connect(gain);
                 gain.connect(ctx.destination);
-                
                 osc.start();
                 osc.stop(ctx.currentTime + 0.1);
             } catch (e) {}
         }
 
-        // Evento Pantalla Completa
         document.getElementById('fullscreenBtn').addEventListener('click', function() {
             playClick();
             if (!document.fullscreenElement) {

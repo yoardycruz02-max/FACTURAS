@@ -1,0 +1,9 @@
+{
+    "name": "Control de Entregas",
+    "short_name": "Control",
+    "start_url": "index.html",
+    "display": "standalone",
+    "background_color": "#05050a",
+    "theme_color": "#00f3ff",
+    "orientation": "portrait"
+}

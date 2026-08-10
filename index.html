@@ -3,18 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control de Entregas y Armados</title>
+    <title>Control PRO | Entregas y Armados</title>
     
-    <!-- PWA Meta Tags para que Chrome/iOS lo reconozcan -->
+    <!-- PWA Meta Tags -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#00f3ff">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
+    <!-- Librerías Externas -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    
     <style>
         :root {
             --bg-dark: #05050a;
@@ -32,41 +34,143 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
 
-        body { background-color: var(--bg-dark); color: var(--text-main); padding: 20px; min-height: 100vh; }
-        header { text-align: center; margin-bottom: 20px; padding-top: 10px; }
-        .header-content { display: flex; flex-direction: column; align-items: center; gap: 15px; }
-        #logoImg { max-width: 180px; height: auto; filter: drop-shadow(0 0 8px rgba(0, 243, 255, 0.3)); }
-        
-        .btn-fs { background: rgba(0, 243, 255, 0.1); border: 1px solid var(--neon-cyan); color: var(--neon-cyan); padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s; }
-        .btn-fs:hover { background: var(--neon-cyan); color: #000; }
+        body { 
+            background: radial-gradient(circle at top right, #1a0b2e, #05050a); 
+            color: var(--text-main); 
+            padding: 20px; 
+            min-height: 100vh; 
+        }
 
-        header h1 { color: var(--neon-cyan); font-size: 1.6rem; text-shadow: 0 0 12px rgba(0, 243, 255, 0.8); text-transform: uppercase; letter-spacing: 2px; }
-        .container { max-width: 900px; margin: 0 auto; }
-        .card { background: linear-gradient(145deg, #121328, var(--bg-card)); border: 2px solid var(--border-neon); border-radius: 16px; padding: 24px; margin-bottom: 25px; box-shadow: 0 0 20px rgba(255, 0, 127, 0.25); }
-        .card h2 { color: var(--neon-pink); font-size: 1.25rem; margin-bottom: 18px; border-bottom: 2px solid rgba(255, 0, 127, 0.4); padding-bottom: 10px; }
+        header { text-align: center; margin-bottom: 25px; padding-top: 10px; }
+        .header-content { display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        #logoImg { max-width: 180px; height: auto; filter: drop-shadow(0 0 12px rgba(0, 243, 255, 0.6)); }
+        
+        .btn-fs { 
+            background: rgba(0, 243, 255, 0.1); 
+            border: 1px solid var(--neon-cyan); 
+            color: var(--neon-cyan); 
+            padding: 8px 18px; 
+            border-radius: 20px; 
+            cursor: pointer; 
+            font-size: 0.75rem; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            transition: all 0.3s; 
+            box-shadow: 0 0 8px rgba(0, 243, 255, 0.2);
+        }
+        .btn-fs:hover { background: var(--neon-cyan); color: #000; box-shadow: 0 0 15px var(--neon-cyan); }
+
+        header h1 { 
+            color: var(--neon-cyan); 
+            font-size: 1.6rem; 
+            text-shadow: 0 0 15px rgba(0, 243, 255, 0.8); 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+        }
+
+        .container { max-width: 950px; margin: 0 auto; }
+
+        .card { 
+            background: linear-gradient(145deg, #121328, var(--bg-card)); 
+            border: 2px solid var(--border-neon); 
+            border-radius: 18px; 
+            padding: 24px; 
+            margin-bottom: 25px; 
+            box-shadow: 0 0 25px rgba(255, 0, 127, 0.25); 
+            backdrop-filter: blur(10px);
+        }
+
+        .card h2 { 
+            color: var(--neon-pink); 
+            font-size: 1.25rem; 
+            margin-bottom: 18px; 
+            border-bottom: 2px solid rgba(255, 0, 127, 0.4); 
+            padding-bottom: 10px; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 0 8px rgba(255, 0, 127, 0.5);
+        }
+
         .form-grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
         @media (min-width: 600px) { .form-grid { grid-template-columns: repeat(2, 1fr); } }
-        .form-group { display: flex; flex-direction: column; }
-        .full-width { grid-column: 1 / -1; }
-        label { font-size: 0.85rem; color: var(--neon-cyan); margin-bottom: 6px; font-weight: 700; }
-        input, select { background-color: #070814; border: 1px solid var(--border-cyan); border-radius: 8px; color: var(--text-main); padding: 12px; outline: none; transition: all 0.3s ease; }
-        input:focus, select:focus { border-color: var(--neon-pink); box-shadow: 0 0 12px rgba(255, 0, 127, 0.6); }
 
-        .signature-container { border: 2px dashed var(--border-cyan); border-radius: 8px; background-color: #070814; position: relative; touch-action: none; }
+        .form-group { display: flex; flex-direction: column; position: relative; }
+        .full-width { grid-column: 1 / -1; }
+        
+        label { font-size: 0.85rem; color: var(--neon-cyan); margin-bottom: 6px; font-weight: 700; text-shadow: 0 0 5px rgba(0, 243, 255, 0.3); }
+        
+        .input-wrapper { display: flex; align-items: center; gap: 8px; }
+
+        input, select { 
+            background-color: #070814; 
+            border: 1px solid var(--border-cyan); 
+            border-radius: 10px; 
+            color: var(--text-main); 
+            padding: 12px; 
+            outline: none; 
+            width: 100%;
+            transition: all 0.3s ease; 
+        }
+        input:focus, select:focus { 
+            border-color: var(--neon-pink); 
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.7); 
+        }
+
+        .btn-mic { 
+            background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink)); 
+            border: none; 
+            color: #fff; 
+            padding: 10px 12px; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-size: 1rem;
+            transition: all 0.3s;
+            box-shadow: 0 0 8px rgba(157, 0, 255, 0.5);
+        }
+        .btn-mic:hover { transform: scale(1.05); box-shadow: 0 0 15px var(--neon-pink); }
+
+        .signature-container { 
+            border: 2px dashed var(--border-cyan); 
+            border-radius: 10px; 
+            background-color: #070814; 
+            position: relative; 
+            touch-action: none; 
+        }
         canvas { display: block; width: 100%; height: 130px; cursor: crosshair; }
         .signature-actions { display: flex; justify-content: space-between; padding: 8px 12px; border-top: 1px solid var(--border-cyan); font-size: 0.75rem; color: var(--text-muted); }
-        .btn-clear { background: none; border: none; color: var(--neon-pink); cursor: pointer; font-weight: bold; }
-        .btn-primary { background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple)); color: #fff; border: none; padding: 14px; border-radius: 8px; font-weight: 800; cursor: pointer; width: 100%; text-transform: uppercase; margin-top: 15px; box-shadow: 0 0 15px rgba(255, 0, 127, 0.5); }
-        .export-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
-        .btn-export { padding: 12px; border: none; border-radius: 8px; color: #fff; font-weight: 700; cursor: pointer; text-transform: uppercase; font-size: 0.85rem; }
-        .btn-excel { background: linear-gradient(135deg, #1d6f42, #2ecc71); }
-        .btn-pdf { background: linear-gradient(135deg, #c0392b, #e74c3c); }
-        .btn-wa { background: linear-gradient(135deg, #1e8449, var(--whatsapp-green)); color: #000; font-weight: 800; }
-        .table-responsive { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        .btn-clear { background: none; border: none; color: var(--neon-pink); cursor: pointer; font-weight: bold; text-transform: uppercase; }
+
+        .btn-primary { 
+            background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple)); 
+            color: #fff; 
+            border: none; 
+            padding: 15px; 
+            border-radius: 10px; 
+            font-weight: 800; 
+            cursor: pointer; 
+            width: 100%; 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+            margin-top: 15px; 
+            box-shadow: 0 0 20px rgba(255, 0, 127, 0.6); 
+            transition: 0.3s;
+        }
+        .btn-primary:hover { box-shadow: 0 0 30px var(--neon-pink); filter: brightness(1.1); }
+
+        .export-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; }
+        .btn-export { padding: 14px; border: none; border-radius: 10px; color: #fff; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; transition: 0.3s; }
+        .btn-excel { background: linear-gradient(135deg, #1d6f42, #2ecc71); box-shadow: 0 0 10px rgba(46, 204, 113, 0.4); }
+        .btn-pdf { background: linear-gradient(135deg, #c0392b, #e74c3c); box-shadow: 0 0 10px rgba(231, 76, 60, 0.4); }
+        .btn-wa { background: linear-gradient(135deg, #1e8449, var(--whatsapp-green)); color: #000; box-shadow: 0 0 10px rgba(37, 211, 102, 0.4); }
+        .btn-export:hover { filter: brightness(1.2); transform: translateY(-2px); }
+
+        .table-responsive { overflow-x: auto; max-height: 400px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; white-space: nowrap; }
         th, td { padding: 12px; border-bottom: 1px solid rgba(0, 243, 255, 0.2); text-align: left; }
-        th { color: var(--neon-green); }
-        .btn-delete { color: var(--neon-pink); cursor: pointer; background: none; border: none; font-size: 1.1rem; }
+        th { color: var(--neon-green); background: rgba(7, 8, 20, 0.9); position: sticky; top: 0; text-shadow: 0 0 8px rgba(57, 255, 20, 0.5); }
+        td { color: var(--text-main); }
+        .btn-delete { color: var(--neon-pink); cursor: pointer; background: none; border: none; font-size: 1.2rem; transition: 0.3s; }
+        .btn-delete:hover { transform: scale(1.2); text-shadow: 0 0 10px var(--neon-pink); }
     </style>
 </head>
 <body>
@@ -83,20 +187,76 @@
         <div class="card">
             <h2>Registro de Datos</h2>
             <form id="registroForm" class="form-grid">
-                <div class="form-group"><label>1. Número de Factura</label><input type="text" id="numFactura" required></div>
-                <div class="form-group"><label>2. Códigos</label><input type="text" id="codigos" required></div>
-                <div class="form-group"><label>3. Artículos</label><input type="text" id="articulos" required></div>
-                <div class="form-group"><label>4. Nombre de Cliente</label><input type="text" id="nombreCliente" required></div>
-                <div class="form-group"><label>5. Fecha Entrega Factura</label><input type="date" id="fechaFactura" required></div>
-                <div class="form-group"><label>6. Vendedor / Personal de Venta</label><input type="text" id="vendedor" required></div>
-                <div class="form-group"><label>7. Fecha de Armado</label><input type="text" id="fechaArmado" placeholder="Ej: Hoy / 09-08-2026" required></div>
-                <div class="form-group"><label>9. Personal de acceso que recibe</label><input type="text" id="personalAcceso" required></div>
-                <div class="form-group"><label>10. Tipo de Servicio</label>
+                
+                <div class="form-group">
+                    <label>1. Número de Factura</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="numFactura" required>
+                        <button type="button" class="btn-mic" onclick="dictar('numFactura')">🎙️</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>2. Códigos</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="codigos" required>
+                        <button type="button" class="btn-mic" onclick="dictar('codigos')">🎙️</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>3. Artículos</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="articulos" required>
+                        <button type="button" class="btn-mic" onclick="dictar('articulos')">🎙️</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>4. Nombre de Cliente</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="nombreCliente" required>
+                        <button type="button" class="btn-mic" onclick="dictar('nombreCliente')">🎙️</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>5. Fecha Entrega Factura</label>
+                    <input type="date" id="fechaFactura" required>
+                </div>
+
+                <div class="form-group">
+                    <label>6. Vendedor / Personal de Venta</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="vendedor" required>
+                        <button type="button" class="btn-mic" onclick="dictar('vendedor')">🎙️</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>7. Fecha de Armado</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="fechaArmado" placeholder="Ej: Hoy / 09-08-2026" required>
+                        <button type="button" class="btn-mic" onclick="dictar('fechaArmado')">🎙️</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>9. Personal de acceso que recibe</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="personalAcceso" required>
+                        <button type="button" class="btn-mic" onclick="dictar('personalAcceso')">🎙️</button>
+                    </div>
+                </div>
+
+                <div class="form-group full-width">
+                    <label>10. Tipo de Servicio</label>
                     <select id="tipoServicio" required>
                         <option value="Armado">Armado</option>
                         <option value="Transporte">Transporte</option>
                     </select>
                 </div>
+
                 <div class="form-group full-width">
                     <label>8. Firma del Vendedor</label>
                     <div class="signature-container">
@@ -107,7 +267,8 @@
                         </div>
                     </div>
                 </div>
-                <button type="submit" class="btn-primary">Guardar Registro</button>
+
+                <button type="submit" class="btn-primary full-width">Guardar Registro</button>
             </form>
         </div>
 
@@ -124,7 +285,19 @@
             <h2>Registros Almacenados</h2>
             <div class="table-responsive">
                 <table id="registrosTable">
-                    <thead><tr><th>Factura</th><th>Cliente</th><th>Servicio</th><th>Acciones</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th>Factura</th>
+                            <th>Cliente</th>
+                            <th>Artículos</th>
+                            <th>Códigos</th>
+                            <th>F. Factura</th>
+                            <th>F. Armado</th>
+                            <th>Vendedor</th>
+                            <th>Servicio</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
                     <tbody id="tablaBody"></tbody>
                 </table>
             </div>
@@ -132,7 +305,7 @@
     </div>
 
     <script>
-        // --- REGISTRO DE SERVICE WORKER PARA INSTALACIÓN PWA ---
+        // --- REGISTRO DE SERVICE WORKER PARA PWA ---
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
@@ -141,7 +314,7 @@
             });
         }
 
-        // --- CÓDIGO ORIGINAL ---
+        // --- EFECTO DE AUDIO ---
         function playClick() {
             try {
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -152,7 +325,7 @@
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(800, ctx.currentTime);
                 osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.1);
-                gain.gain.setValueAtTime(0.6, ctx.currentTime);
+                gain.gain.setValueAtTime(0.4, ctx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
                 osc.connect(gain);
                 gain.connect(ctx.destination);
@@ -161,6 +334,24 @@
             } catch (e) {}
         }
 
+        // --- DICTADO POR VOZ ---
+        function dictar(inputId) {
+            playClick();
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert("Tu navegador no soporta dictado por voz.");
+                return;
+            }
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const rec = new SpeechRecognition();
+            rec.lang = 'es-ES';
+            rec.start();
+            rec.onresult = (e) => {
+                document.getElementById(inputId).value = e.results[0][0].transcript;
+                playClick();
+            };
+        }
+
+        // --- PANTALLA COMPLETA ---
         document.getElementById('fullscreenBtn').addEventListener('click', function() {
             playClick();
             if (!document.fullscreenElement) {
@@ -172,13 +363,11 @@
             }
         });
 
-        document.querySelectorAll('input, select, button').forEach(el => {
-            el.addEventListener('click', playClick);
-        });
-
+        // --- FECHA POR DEFECTO ---
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('fechaFactura').value = today;
 
+        // --- CONFIGURACIÓN DE FIRMA ---
         const canvas = document.getElementById('signatureCanvas');
         const ctx = canvas.getContext('2d');
         let painting = false;
@@ -187,7 +376,10 @@
             const rect = canvas.getBoundingClientRect();
             canvas.width = rect.width;
             canvas.height = 130;
-            ctx.strokeStyle = '#00f3ff'; ctx.lineWidth = 2.5; ctx.lineJoin = 'round';
+            ctx.strokeStyle = '#00f3ff'; 
+            ctx.lineWidth = 2.5; 
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
         }
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
@@ -200,17 +392,25 @@
             const rect = canvas.getBoundingClientRect();
             const x = (e.clientX || (e.touches ? e.touches[0].clientX : 0)) - rect.left;
             const y = (e.clientY || (e.touches ? e.touches[0].clientY : 0)) - rect.top;
-            ctx.lineTo(x, y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x, y);
+            ctx.lineTo(x, y); 
+            ctx.stroke(); 
+            ctx.beginPath(); 
+            ctx.moveTo(x, y);
         }
 
-        canvas.addEventListener('mousedown', start); canvas.addEventListener('mouseup', end); canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('touchstart', start); canvas.addEventListener('touchend', end); canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('mousedown', start); 
+        canvas.addEventListener('mouseup', end); 
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('touchstart', start); 
+        canvas.addEventListener('touchend', end); 
+        canvas.addEventListener('touchmove', draw);
         
         document.getElementById('clearCanvas').addEventListener('click', () => {
             playClick();
-            ctx.clearRect(0,0, canvas.width, canvas.height);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
         });
 
+        // --- MANEJO DE REGISTROS ---
         let registros = JSON.parse(localStorage.getItem('control_entregas_registros')) || [];
 
         function renderTable() {
@@ -218,7 +418,17 @@
             tablaBody.innerHTML = '';
             registros.forEach((reg, index) => {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `<td>${reg.numFactura}</td><td>${reg.nombreCliente}</td><td>${reg.tipoServicio}</td><td><button class="btn-delete" onclick="playClick(); eliminar(${index})">🗑️</button></td>`;
+                tr.innerHTML = `
+                    <td>${reg.numFactura}</td>
+                    <td>${reg.nombreCliente}</td>
+                    <td>${reg.articulos}</td>
+                    <td>${reg.codigos}</td>
+                    <td>${reg.fechaFactura}</td>
+                    <td>${reg.fechaArmado}</td>
+                    <td>${reg.vendedor}</td>
+                    <td>${reg.tipoServicio}</td>
+                    <td><button class="btn-delete" onclick="playClick(); eliminar(${index})">🗑️</button></td>
+                `;
                 tablaBody.appendChild(tr);
             });
         }
@@ -227,22 +437,22 @@
             e.preventDefault();
             playClick();
             const nuevo = {
-                Factura: document.getElementById('numFactura').value,
-                Codigos: document.getElementById('codigos').value,
-                Articulos: document.getElementById('articulos').value,
-                Cliente: document.getElementById('nombreCliente').value,
-                FechaFactura: document.getElementById('fechaFactura').value,
-                Vendedor: document.getElementById('vendedor').value,
-                FechaArmado: document.getElementById('fechaArmado').value,
-                PersonalRecibe: document.getElementById('personalAcceso').value,
-                Servicio: document.getElementById('tipoServicio').value
+                numFactura: document.getElementById('numFactura').value,
+                codigos: document.getElementById('codigos').value,
+                articulos: document.getElementById('articulos').value,
+                nombreCliente: document.getElementById('nombreCliente').value,
+                fechaFactura: document.getElementById('fechaFactura').value,
+                vendedor: document.getElementById('vendedor').value,
+                fechaArmado: document.getElementById('fechaArmado').value,
+                personalAcceso: document.getElementById('personalAcceso').value,
+                tipoServicio: document.getElementById('tipoServicio').value
             };
             registros.push(nuevo);
             localStorage.setItem('control_entregas_registros', JSON.stringify(registros));
             alert('¡Guardado con éxito!');
             document.getElementById('registroForm').reset();
             document.getElementById('fechaFactura').value = today;
-            ctx.clearRect(0,0, canvas.width, canvas.height);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             renderTable();
         });
 
@@ -254,29 +464,33 @@
             }
         }
 
+        // --- EXPORTACIÓN COMPLETA ---
         function exportarExcel() {
+            if(registros.length === 0) { alert('No hay datos para exportar'); return; }
             const wb = XLSX.utils.book_new();
             const ws = XLSX.utils.json_to_sheet(registros);
-            XLSX.utils.book_append_sheet(wb, ws, "Reporte");
-            XLSX.writeFile(wb, "Reporte_Entregas.xlsx");
+            XLSX.utils.book_append_sheet(wb, ws, "Reporte_Entregas");
+            XLSX.writeFile(wb, "Reporte_Entregas_Armados.xlsx");
         }
 
         function exportarPDF() {
+            if(registros.length === 0) { alert('No hay datos para exportar'); return; }
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            doc.text("Reporte de Entregas y Armados", 14, 15);
+            const doc = new jsPDF('landscape');
+            doc.text("Reporte General de Entregas y Armados", 14, 15);
             doc.autoTable({
-                head: [['Factura', 'Cliente', 'Artículos', 'Vendedor', 'Servicio', 'F. Armado']],
-                body: registros.map(r => [r.Factura, r.Cliente, r.Articulos, r.Vendedor, r.Servicio, r.FechaArmado]),
-                startY: 20
+                head: [['Factura', 'Cliente', 'Artículos', 'Códigos', 'F. Factura', 'F. Armado', 'Vendedor', 'Servicio', 'Recibe']],
+                body: registros.map(r => [r.numFactura, r.nombreCliente, r.articulos, r.codigos, r.fechaFactura, r.fechaArmado, r.vendedor, r.tipoServicio, r.personalAcceso]),
+                startY: 20,
+                styles: { fontSize: 8 }
             });
-            doc.save("Reporte_Entregas.pdf");
+            doc.save("Reporte_Entregas_Armados.pdf");
         }
 
         function enviarWhatsApp() {
             if(registros.length === 0) { alert('No hay datos para compartir'); return; }
             const ultimo = registros[registros.length - 1];
-            const msg = `*REPORTE DE ENTREGA*\n\nFactura: ${ultimo.Factura}\nCliente: ${ultimo.Cliente}\nServicio: ${ultimo.Servicio}\nF. Armado: ${ultimo.FechaArmado}\nArtículos: ${ultimo.Artículos}\nVendedor: ${ultimo.Vendedor}`;
+            const msg = `*REPORTE DE ENTREGA Y ARMADO*\n\nFactura: ${ultimo.numFactura}\nCliente: ${ultimo.nombreCliente}\nArtículos: ${ultimo.articulos}\nCódigos: ${ultimo.codigos}\nF. Factura: ${ultimo.fechaFactura}\nF. Armado: ${ultimo.fechaArmado}\nVendedor: ${ultimo.vendedor}\nServicio: ${ultimo.tipoServicio}\nRecibe: ${ultimo.personalAcceso}`;
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
         }
 

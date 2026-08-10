@@ -464,7 +464,7 @@
             }
         }
 
-        // --- EXPORTACIÓN COMPLETA ---
+        // --- EXPORTACIÓN COMPLETA (EXCEL) ---
         function exportarExcel() {
             if(registros.length === 0) { alert('No hay datos para exportar'); return; }
             const wb = XLSX.utils.book_new();
@@ -473,6 +473,7 @@
             XLSX.writeFile(wb, "Reporte_Entregas_Armados.xlsx");
         }
 
+        // --- EXPORTACIÓN COMPLETA (PDF) ---
         function exportarPDF() {
             if(registros.length === 0) { alert('No hay datos para exportar'); return; }
             const { jsPDF } = window.jspdf;
@@ -487,10 +488,21 @@
             doc.save("Reporte_Entregas_Armados.pdf");
         }
 
+        // --- COMPARTIR TODOS LOS REGISTROS POR WHATSAPP ---
         function enviarWhatsApp() {
             if(registros.length === 0) { alert('No hay datos para compartir'); return; }
-            const ultimo = registros[registros.length - 1];
-            const msg = `*REPORTE DE ENTREGA Y ARMADO*\n\nFactura: ${ultimo.numFactura}\nCliente: ${ultimo.nombreCliente}\nArtículos: ${ultimo.articulos}\nCódigos: ${ultimo.codigos}\nF. Factura: ${ultimo.fechaFactura}\nF. Armado: ${ultimo.fechaArmado}\nVendedor: ${ultimo.vendedor}\nServicio: ${ultimo.tipoServicio}\nRecibe: ${ultimo.personalAcceso}`;
+            let msg = `*REPORTE GENERAL DE ENTregas Y ARMADOS*\nTotal registros: ${registros.length}\n\n`;
+            registros.forEach((r, i) => {
+                msg += `*#${i + 1} - Factura: ${r.numFactura}*\n`;
+                msg += `Cliente: ${r.nombreCliente}\n`;
+                msg += `Artículos: ${r.articulos}\n`;
+                msg += `Códigos: ${r.codigos}\n`;
+                msg += `F. Factura: ${r.fechaFactura}\n`;
+                msg += `F. Armado: ${r.fechaArmado}\n`;
+                msg += `Vendedor: ${r.vendedor}\n`;
+                msg += `Servicio: ${r.tipoServicio}\n`;
+                msg += `Recibe: ${r.personalAcceso}\n-------------------\n`;
+            });
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
         }
 

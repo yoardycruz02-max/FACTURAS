@@ -129,17 +129,6 @@
         }
         .btn-mic:hover { transform: scale(1.05); box-shadow: 0 0 15px var(--neon-pink); }
 
-        .signature-container { 
-            border: 2px dashed var(--border-cyan); 
-            border-radius: 10px; 
-            background-color: #070814; 
-            position: relative; 
-            touch-action: none; 
-        }
-        canvas { display: block; width: 100%; height: 130px; cursor: crosshair; }
-        .signature-actions { display: flex; justify-content: space-between; padding: 8px 12px; border-top: 1px solid var(--border-cyan); font-size: 0.75rem; color: var(--text-muted); }
-        .btn-clear { background: none; border: none; color: var(--neon-pink); cursor: pointer; font-weight: bold; text-transform: uppercase; }
-
         .btn-primary { 
             background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple)); 
             color: #fff; 
@@ -236,13 +225,13 @@
                 <div class="form-group">
                     <label>7. Fecha de Armado</label>
                     <div class="input-wrapper">
-                        <input type="text" id="fechaArmado" placeholder="Ej: Hoy / 09-08-2026" required>
+                        <input type="text" id="fechaArmado" placeholder="Ej: DD/MM/AAAA o Hoy" required maxlength="10">
                         <button type="button" class="btn-mic" onclick="dictar('fechaArmado')">🎙️</button>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>9. Personal de acceso que recibe</label>
+                    <label>8. Personal de acceso que recibe</label>
                     <div class="input-wrapper">
                         <input type="text" id="personalAcceso" required>
                         <button type="button" class="btn-mic" onclick="dictar('personalAcceso')">🎙️</button>
@@ -250,22 +239,11 @@
                 </div>
 
                 <div class="form-group full-width">
-                    <label>10. Tipo de Servicio</label>
+                    <label>9. Tipo de Servicio</label>
                     <select id="tipoServicio" required>
                         <option value="Armado">Armado</option>
                         <option value="Transporte">Transporte</option>
                     </select>
-                </div>
-
-                <div class="form-group full-width">
-                    <label>8. Firma del Vendedor</label>
-                    <div class="signature-container">
-                        <canvas id="signatureCanvas"></canvas>
-                        <div class="signature-actions">
-                            <span>Firme aquí</span>
-                            <button type="button" class="btn-clear" id="clearCanvas">Limpiar Firma</button>
-                        </div>
-                    </div>
                 </div>
 
                 <button type="submit" class="btn-primary full-width">Guardar Registro</button>
@@ -367,47 +345,26 @@
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('fechaFactura').value = today;
 
-        // --- CONFIGURACIÓN DE FIRMA ---
-        const canvas = document.getElementById('signatureCanvas');
-        const ctx = canvas.getContext('2d');
-        let painting = false;
+        // --- AUTO-FORMATO FECHA DE ARMADO (MÁSCARA DD/MM/YYYY) ---
+        document.getElementById('fechaArmado').addEventListener('input', function(e) {
+            // Si el usuario presiona borrar, dejamos que el input actúe normal
+            if (e.inputType === 'deleteContentBackward' || e.inputType === 'deleteContentForward') return;
+            
+            let v = this.value;
+            // Si empieza con letras (ej. si usó el dictado por voz para decir "Hoy"), no aplicamos máscara numérica
+            if (/^[a-zA-Z]/.test(v)) return;
 
-        function resizeCanvas() {
-            const rect = canvas.getBoundingClientRect();
-            canvas.width = rect.width;
-            canvas.height = 130;
-            ctx.strokeStyle = '#00f3ff'; 
-            ctx.lineWidth = 2.5; 
-            ctx.lineJoin = 'round';
-            ctx.lineCap = 'round';
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+            // Quitamos todo lo que no sea número
+            v = v.replace(/\D/g, '');
 
-        function start(e) { painting = true; draw(e); }
-        function end() { painting = false; ctx.beginPath(); }
-        function draw(e) {
-            if (!painting) return;
-            e.preventDefault();
-            const rect = canvas.getBoundingClientRect();
-            const x = (e.clientX || (e.touches ? e.touches[0].clientX : 0)) - rect.left;
-            const y = (e.clientY || (e.touches ? e.touches[0].clientY : 0)) - rect.top;
-            ctx.lineTo(x, y); 
-            ctx.stroke(); 
-            ctx.beginPath(); 
-            ctx.moveTo(x, y);
-        }
-
-        canvas.addEventListener('mousedown', start); 
-        canvas.addEventListener('mouseup', end); 
-        canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('touchstart', start); 
-        canvas.addEventListener('touchend', end); 
-        canvas.addEventListener('touchmove', draw);
-        
-        document.getElementById('clearCanvas').addEventListener('click', () => {
-            playClick();
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Aplicamos las plecas según los dígitos ingresados
+            if (v.length >= 5) {
+                this.value = v.substring(0, 2) + '/' + v.substring(2, 4) + '/' + v.substring(4, 8);
+            } else if (v.length >= 3) {
+                this.value = v.substring(0, 2) + '/' + v.substring(2, 4);
+            } else {
+                this.value = v;
+            }
         });
 
         // --- MANEJO DE REGISTROS ---
@@ -452,7 +409,6 @@
             alert('¡Guardado con éxito!');
             document.getElementById('registroForm').reset();
             document.getElementById('fechaFactura').value = today;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
             renderTable();
         });
 
@@ -491,7 +447,7 @@
         // --- COMPARTIR TODOS LOS REGISTROS POR WHATSAPP ---
         function enviarWhatsApp() {
             if(registros.length === 0) { alert('No hay datos para compartir'); return; }
-            let msg = `*REPORTE GENERAL DE ENTregas Y ARMADOS*\nTotal registros: ${registros.length}\n\n`;
+            let msg = `*REPORTE GENERAL DE ENTREGAS Y ARMADOS*\nTotal registros: ${registros.length}\n\n`;
             registros.forEach((r, i) => {
                 msg += `*#${i + 1} - Factura: ${r.numFactura}*\n`;
                 msg += `Cliente: ${r.nombreCliente}\n`;
